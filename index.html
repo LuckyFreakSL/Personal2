@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einsatzplaner</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--surface:#181b22;--surface2:#1f2330;--border:#2c3040;--accent:#25d366;--text:#e8eaed;--muted:#5a6272;--danger:#ef4444;--warn:#f59e0b;--blue:#60a5fa;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;}
+.logo{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.header h1{font-size:17px;font-weight:800;letter-spacing:-.5px;}
+.header h1 span{color:var(--accent);}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+.tab{padding:7px 15px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;transition:all .15s;}
+.tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
+.tab:hover:not(.active){color:var(--text);}
+.main{max-width:1150px;margin:0 auto;padding:24px;}
+.page{display:none;}.page.active{display:block;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:20px;}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-title .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+label{font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.form-group{margin-bottom:13px;}
+.btn{padding:9px 17px;border-radius:7px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#000;}.btn-primary:hover{background:#1ec55a;}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid #ef444433;font-size:11px;padding:5px 10px;}.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-import{background:#60a5fa22;color:var(--blue);border:1px solid #60a5fa44;}.btn-import:hover{background:#60a5fa33;}
+.btn-export{background:#25d36622;color:var(--accent);border:1px solid #25d36644;}.btn-export:hover{background:#25d36633;}
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;margin:2px;cursor:pointer;}
+.day-picker{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.day-pill{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;transition:all .15s;user-select:none;}
+.day-pill.active{background:var(--accent);color:#000;border-color:var(--accent);}
+.day-pill:hover:not(.active){color:var(--text);border-color:var(--text);}
+.list-item{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 14px;background:var(--surface2);border-radius:9px;margin-bottom:7px;border:1px solid transparent;transition:border-color .15s;}
+.list-item:hover{border-color:var(--border);}
+.lli{display:flex;align-items:flex-start;gap:11px;}
+.avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;}
+.item-name{font-size:14px;font-weight:700;}
+.item-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.plan-standort{background:var(--surface2);border-radius:11px;padding:15px;border:1px solid var(--border);}
+.plan-st-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px;gap:8px;}
+.plan-st-name{font-size:14px;font-weight:700;}
+.plan-st-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.plan-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.badge-ok{background:#25d36622;color:var(--accent);border:1px solid #25d36633;}
+.badge-warn{background:#f59e0b22;color:var(--warn);border:1px solid #f59e0b33;}
+.badge-err{background:#ef444422;color:var(--danger);border:1px solid #ef444433;}
+.ma-slot{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.ma-slot select{flex:1;font-size:12px;padding:7px 10px;}
+.ma-slot-empty{border:1.5px dashed var(--border);border-radius:7px;padding:7px 11px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer;background:transparent;width:100%;transition:border-color .15s;margin-top:4px;}
+.ma-slot-empty:hover{border-color:var(--accent);color:var(--accent);}
+.suggest-section{margin-top:10px;}
+.suggest-label{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.suggest-bar{display:flex;flex-wrap:wrap;gap:5px;}
+.suggest-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;}
+.suggest-chip:hover{opacity:.8;transform:translateY(-1px);}
+.termin-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;}
+.termin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.termin-name{font-size:14px;font-weight:700;}
+.termin-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.termin-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#f59e0b22;color:var(--warn);border:1px solid #f59e0b33;}
+.wa-wrap{background:#075e54;border-radius:14px;padding:20px;}
+.wa-bubble{background:#dcf8c6;color:#111;border-radius:12px 12px 2px 12px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:500px;overflow-y:auto;}
+.wa-time{text-align:right;font-size:10px;color:#666;margin-top:6px;}
+.copy-btn{width:100%;margin-top:10px;padding:12px;background:var(--accent);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;}
+.copy-btn:hover{background:#1ec55a;transform:translateY(-1px);}
+.conflict-box{background:#ef444411;border:1px solid #ef444433;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--danger);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.ok-box{background:#25d36611;border:1px solid #25d36633;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;}
+.info-box{background:#60a5fa11;border:1px solid #60a5fa33;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--blue);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.warn-box{background:#f59e0b11;border:1px solid #f59e0b33;border-radius:8px;padding:8px 12px;font-size:12px;color:var(--warn);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.skills-row{display:flex;gap:7px;align-items:center;}.skills-row input{flex:1;}
+.empty-state{text-align:center;padding:36px;color:var(--muted);}.empty-state .e{font-size:36px;margin-bottom:10px;}
+/* Abwesenheiten */
+.abw-bar{background:var(--surface2);border:1px solid #ef444433;border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.abw-bar-label{font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.abw-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;font-weight:500;}
+.abw-chip-krank{background:#ef444422;color:var(--danger);border:1px solid #ef444433;}
+.abw-chip-frei{background:#f59e0b22;color:var(--warn);border:1px solid #f59e0b33;}
+.abw-chip-urlaub{background:#60a5fa22;color:var(--blue);border:1px solid #60a5fa33;}
+.abw-chip button{background:none;border:none;cursor:pointer;color:inherit;font-size:12px;padding:0;line-height:1;}
+.abw-add{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+select.abw-select{width:auto;font-size:12px;padding:5px 9px;}
+/* gesperrte MA in Dropdown grau */
+option.gesperrt{color:#5a6272!important;}
+/* Daten-Backup Bereich */
+.backup-section{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:18px;margin-bottom:16px;}
+.backup-section h3{font-size:13px;font-weight:700;margin-bottom:6px;}
+.backup-section p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.backup-btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+@media(max-width:700px){.grid2{grid-template-columns:1fr;}.tabs{gap:2px;}.tab{padding:6px 9px;font-size:11px;}.plan-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📋</div>
+  <h1>Einsatz<span>Planer</span></h1>
+  <div class="tabs">
+    <button class="tab active" onclick="nav('plan',this)">Tagesplan</button>
+    <button class="tab" onclick="nav('mitarbeiter',this)">Mitarbeiter</button>
+    <button class="tab" onclick="nav('standorte',this)">Standorte</button>
+    <button class="tab" onclick="nav('termine',this)">🔁 Termine</button>
+    <button class="tab" onclick="nav('import',this)">📥 Import</button>
+    <button class="tab" onclick="nav('whatsapp',this)">WhatsApp</button>
+    <button class="tab" onclick="nav('backup',this)">💾 Backup</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- TAGESPLAN -->
+<div id="page-plan" class="page active">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input type="date" id="plan-datum" style="width:auto" onchange="renderPlan()">
+    <button class="btn btn-primary" onclick="autoAssign()">⚡ Auto-Zuweisung</button>
+    <button class="btn btn-ghost" onclick="autoAssignStamm()">🏠 Stammteam</button>
+    <button class="btn btn-ghost" onclick="clearDay()">🗑 Leeren</button>
+    <span id="plan-status" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></span>
+  </div>
+  <!-- Abwesenheiten für diesen Tag -->
+  <div id="abwesenheit-bar" style="margin-bottom:16px"></div>
+  <div id="plan-termine-hint"></div>
+  <div id="plan-content"></div>
+</div>
+
+<!-- MITARBEITER -->
+<div id="page-mitarbeiter" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Neuer Mitarbeiter</div>
+      <div class="form-group"><label>Name</label><input id="ma-name" placeholder="Max Mustermann"></div>
+      <div class="form-group"><label>Telefon</label><input id="ma-tel" placeholder="+49 170 ..."></div>
+      <div class="form-group">
+        <label>Qualifikationen</label>
+        <div class="skills-row">
+          <input id="ma-skill" placeholder="z.B. Kehrmaschine ..." onkeydown="if(event.key==='Enter')addMaSkill()">
+          <button class="btn btn-ghost" onclick="addMaSkill()">+ Add</button>
+        </div>
+        <div id="ma-skill-tags" style="margin-top:8px"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="addMitarbeiter()">Speichern</button>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Alle Mitarbeiter (<span id="ma-count">0</span>)</div>
+      <div id="ma-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STANDORTE -->
+<div id="page-standorte" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Neuer Standort</div>
+      <div class="form-group"><label>Name</label><input id="st-name" placeholder="Boostedt, Arsenal ..."></div>
+      <div class="form-group"><label>Adresse (optional)</label><input id="st-adresse" placeholder="Musterstraße 1, Stadt"></div>
+      <div class="form-group">
+        <label>Aktiv an Wochentagen</label>
+        <div class="day-picker" id="st-days">
+          <span class="day-pill" data-day="1" onclick="toggleDay(this)">Mo</span>
+          <span class="day-pill" data-day="2" onclick="toggleDay(this)">Di</span>
+          <span class="day-pill" data-day="3" onclick="toggleDay(this)">Mi</span>
+          <span class="day-pill" data-day="4" onclick="toggleDay(this)">Do</span>
+          <span class="day-pill" data-day="5" onclick="toggleDay(this)">Fr</span>
+          <span class="day-pill" data-day="6" onclick="toggleDay(this)">Sa</span>
+          <span class="day-pill" data-day="0" onclick="toggleDay(this)">So</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="setAllDays([1,2,3,4,5])">Werktags</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="setAllDays([1,2,3,4,5,6,0])">Täglich</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="setAllDays([])">Keiner</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Stammteam pro Wochentag</label>
+        <div id="st-stamm-pro-tag"><div style="font-size:11px;color:var(--muted)">Wähle erst Wochentage aus.</div></div>
+      </div>
+      <div class="form-group"><label>Ø Mitarbeiterzahl</label><input id="st-anzahl" type="number" min="1" value="2"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addStandort()">Speichern</button>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Alle Standorte (<span id="st-count">0</span>)</div>
+      <div id="st-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMINE -->
+<div id="page-termine" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Neuer Wiederholungs-Termin</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Für Aufgaben die sich regelmäßig wiederholen – z.B. Wartung jeden 1. Montag.</div>
+      <div class="form-group"><label>Bezeichnung</label><input id="tr-name" placeholder="z.B. Dachrinne Neustadt ..."></div>
+      <div class="form-group"><label>Standort (optional)</label><select id="tr-standort"><option value="">— kein fester Standort —</option></select></div>
+      <div class="form-group">
+        <label>Wochentag(e)</label>
+        <div class="day-picker" id="tr-days">
+          <span class="day-pill" data-day="1" onclick="this.classList.toggle('active')">Mo</span>
+          <span class="day-pill" data-day="2" onclick="this.classList.toggle('active')">Di</span>
+          <span class="day-pill" data-day="3" onclick="this.classList.toggle('active')">Mi</span>
+          <span class="day-pill" data-day="4" onclick="this.classList.toggle('active')">Do</span>
+          <span class="day-pill" data-day="5" onclick="this.classList.toggle('active')">Fr</span>
+          <span class="day-pill" data-day="6" onclick="this.classList.toggle('active')">Sa</span>
+          <span class="day-pill" data-day="0" onclick="this.classList.toggle('active')">So</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Welche Woche(n) im Monat</label>
+        <div class="day-picker" id="tr-weeks">
+          <span class="day-pill" data-w="1" onclick="this.classList.toggle('active')">1.</span>
+          <span class="day-pill" data-w="2" onclick="this.classList.toggle('active')">2.</span>
+          <span class="day-pill" data-w="3" onclick="this.classList.toggle('active')">3.</span>
+          <span class="day-pill" data-w="4" onclick="this.classList.toggle('active')">4.</span>
+          <span class="day-pill" data-w="0" onclick="this.classList.toggle('active')">Alle</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mitarbeiter</label>
+        <div class="skills-row">
+          <input id="tr-ma-input" placeholder="Name ..." onkeydown="if(event.key==='Enter')addTrMa()" list="ma-datalist2">
+          <button class="btn btn-ghost" onclick="addTrMa()">+ Add</button>
+        </div>
+        <datalist id="ma-datalist2"></datalist>
+        <div id="tr-ma-tags" style="margin-top:8px"></div>
+      </div>
+      <div class="form-group"><label>Notiz</label><input id="tr-notiz" placeholder="z.B. Leiter mitbringen"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addTermin()">Termin speichern</button>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Alle Termine (<span id="tr-count">0</span>)</div>
+      <div id="tr-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div id="page-import" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>WhatsApp-Nachricht importieren</div>
+      <div style="background:#60a5fa11;border:1px solid #60a5fa33;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--blue)">📥 Format:</strong> Standortname (allein), darunter Mitarbeiternamen, Leerzeile = nächster Standort.
+      </div>
+      <div class="form-group"><label>Datum</label><input type="date" id="imp-datum"></div>
+      <div class="form-group"><label>WhatsApp-Text</label>
+        <textarea id="imp-text" rows="14" placeholder="Montag&#10;09.03.26&#10;&#10;Boostedt&#10;Thomas&#10;Manni&#10;&#10;Asyl Rendsburg&#10;Samir&#10;Sven&#10;..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-import" style="flex:1" onclick="parseImport()">📥 Importieren</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('imp-text').value=''">Leeren</button>
+      </div>
+      <div id="imp-result" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Vorschau</div>
+      <div id="imp-preview"><div class="empty-state"><div class="e">📋</div><p>Vorschau erscheint nach dem Parsen</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP -->
+<div id="page-whatsapp" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Nachricht generieren</div>
+      <div class="form-group"><label>Datum</label><input type="date" id="wa-datum"></div>
+      <div class="form-group"><label>Einleitung</label><input id="wa-intro" value="Guten Morgen Team! 👋"></div>
+      <div class="form-group"><label>Abschluss</label><input id="wa-outro" value="Guten Start und bleibt sicher! 💪"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="generateWA()">📋 Nachricht generieren</button>
+      <div id="wa-konflikte" style="margin-top:14px"></div>
+    </div>
+    <div>
+      <div class="wa-wrap">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:22px">💬</span>
+          <div><div style="font-weight:800;color:#fff;font-size:15px">WhatsApp Nachricht</div><div style="font-size:11px;color:rgba(255,255,255,.5)">Bereit zum Kopieren</div></div>
+        </div>
+        <div class="wa-bubble" id="wa-text">Datum wählen → Nachricht generieren</div>
+        <div class="wa-time" id="wa-time"></div>
+      </div>
+      <button class="copy-btn" onclick="copyWA()"><span>📲</span> In Zwischenablage kopieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP -->
+<div id="page-backup" class="page">
+  <div class="grid2">
+    <div>
+      <div class="backup-section">
+        <h3>📤 Daten exportieren</h3>
+        <p>Wähle die beste Methode für dein Gerät:</p>
+        <div class="backup-btn-row" style="flex-direction:column;gap:10px">
+          <button class="btn btn-export" style="width:100%" onclick="exportDataiOS()">📋 Daten anzeigen &amp; kopieren <span style="font-size:10px;opacity:.7">(iPhone/iPad)</span></button>
+          <button class="btn btn-export" style="width:100%" onclick="exportData()">📤 Als Datei speichern <span style="font-size:10px;opacity:.7">(PC/Mac)</span></button>
+        </div>
+        <div id="export-status" style="margin-top:10px"></div>
+        <!-- iOS Export Box -->
+        <div id="ios-export-box" style="display:none;margin-top:12px">
+          <div style="font-size:11px;color:var(--blue);margin-bottom:6px;font-weight:700">👇 Alles markieren → Kopieren → per Notizen/Mail ans andere Gerät schicken</div>
+          <textarea id="ios-export-text" rows="8" style="font-size:11px" readonly onclick="this.select()"></textarea>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="selectAndCopyExport()">📋 Alles kopieren</button>
+        </div>
+      </div>
+
+      <div class="backup-section">
+        <h3>📥 Daten importieren</h3>
+        <p>Lade eine zuvor exportierte JSON-Datei, oder füge den JSON-Text direkt ein. <strong style="color:var(--danger)">Achtung:</strong> Dies überschreibt alle aktuellen Daten!</p>
+        <div class="form-group" style="margin-bottom:10px">
+          <label>JSON-Datei wählen</label>
+          <input type="file" id="backup-file" accept=".json" onchange="loadBackupFile(this)" style="cursor:pointer">
+        </div>
+        <div class="form-group">
+          <label>Oder JSON-Text einfügen</label>
+          <textarea id="backup-json-input" rows="6" placeholder='{"mitarbeiter":[...],"standorte":[...],...}'></textarea>
+        </div>
+        <div class="backup-btn-row">
+          <button class="btn btn-import" onclick="importFromText()">📥 Daten laden</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('backup-json-input').value=''">Leeren</button>
+        </div>
+        <div id="import-backup-status" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="backup-section">
+        <h3>ℹ️ Wie funktioniert das?</h3>
+        <p style="margin-bottom:0">
+          <strong style="color:var(--text)">iPhone/iPad:</strong><br>
+          1. "Daten anzeigen &amp; kopieren" klicken<br>
+          2. "Alles kopieren" klicken<br>
+          3. Text in Notizen oder Mail einfügen &amp; senden<br>
+          4. Auf Zielgerät: Text kopieren → Backup → Einfügen → Laden<br><br>
+          <strong style="color:var(--text)">PC/Mac:</strong><br>
+          1. "Als Datei speichern" → JSON-Datei wird heruntergeladen<br>
+          2. Auf Zielgerät: Backup → Datei wählen → Laden<br><br>
+        </p>
+      </div>
+      <div class="backup-section">
+        <h3>📊 Aktueller Datenstand</h3>
+        <div id="backup-stats" style="font-family:'DM Mono',monospace;font-size:12px;line-height:2;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+<datalist id="ma-datalist"></datalist>
+
+<script>
+const DAYS=['So','Mo','Di','Mi','Do','Fr','Sa'];
+const DAYSFULL=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+
+const INITIAL={
+  mitarbeiter:[
+    {id:1,name:'Thomas',tel:'',skills:[],color:'#25d366'},
+    {id:2,name:'Manni',tel:'',skills:[],color:'#60a5fa'},
+    {id:3,name:'Larissa',tel:'',skills:[],color:'#f59e0b'},
+    {id:4,name:'Martin',tel:'',skills:[],color:'#a78bfa'},
+    {id:5,name:'Samir',tel:'',skills:[],color:'#ec4899'},
+    {id:6,name:'Sven',tel:'',skills:[],color:'#34d399'},
+    {id:7,name:'Timo',tel:'',skills:[],color:'#fb923c'},
+    {id:8,name:'Uwe',tel:'',skills:[],color:'#38bdf8'},
+    {id:9,name:'Christian N',tel:'',skills:[],color:'#818cf8'},
+    {id:10,name:'Finn',tel:'',skills:[],color:'#f87171'},
+    {id:11,name:'Jan',tel:'',skills:[],color:'#4ade80'},
+    {id:12,name:'Julia',tel:'',skills:[],color:'#e879f9'},
+    {id:13,name:'Dennis',tel:'',skills:[],color:'#fbbf24'},
+    {id:14,name:'Bennet',tel:'',skills:[],color:'#2dd4bf'},
+    {id:15,name:'Gerd',tel:'',skills:[],color:'#f97316'},
+    {id:16,name:'Kevin',tel:'',skills:[],color:'#a3e635'},
+    {id:17,name:'Lukas',tel:'',skills:[],color:'#22d3ee'},
+    {id:18,name:'Poul',tel:'',skills:[],color:'#c084fc'},
+    {id:19,name:'Patrick',tel:'',skills:[],color:'#fb7185'},
+    {id:20,name:'Kenneth',tel:'',skills:[],color:'#86efac'},
+    {id:21,name:'Christian B',tel:'',skills:[],color:'#fca5a5'},
+    {id:22,name:'Leiharbeiter 1',tel:'',skills:[],color:'#94a3b8'},
+    {id:23,name:'Leiharbeiter 2',tel:'',skills:[],color:'#94a3b8'},
+  ],
+  standorte:[
+    {id:101,name:'Boostedt',adresse:'',activeDays:[1,2,3,4,5],stammProTag:{'1':[1,2],'2':[1,2],'3':[1,2],'4':[1,2],'5':[1,2]},anzahl:2},
+    {id:102,name:'Asyl Rendsburg',adresse:'',activeDays:[1,2,3,4,5],stammProTag:{'1':[5,6],'2':[5,6],'3':[5,6],'4':[5,6],'5':[5,6]},anzahl:2},
+    {id:103,name:'MSTP Kiel',adresse:'',activeDays:[1,2,3,4,5],stammProTag:{'1':[7],'2':[7],'3':[7],'4':[7],'5':[7]},anzahl:1},
+    {id:104,name:'Arsenal',adresse:'',activeDays:[],stammProTag:{},anzahl:2},
+    {id:105,name:'Gmsh',adresse:'',activeDays:[1,2,3,4,5],stammProTag:{'1':[9],'2':[9],'3':[9],'4':[9],'5':[9]},anzahl:1},
+    {id:106,name:'HJK',adresse:'',activeDays:[],stammProTag:{},anzahl:2},
+    {id:107,name:'BW Plön',adresse:'',activeDays:[],stammProTag:{},anzahl:2},
+    {id:108,name:'BW Eckernförde',adresse:'',activeDays:[],stammProTag:{},anzahl:3},
+    {id:109,name:'Dachrinnenreinigung',adresse:'Ort variiert',activeDays:[1,2,3,4,5],stammProTag:{'1':[13,14],'2':[13,14],'3':[13,14],'4':[13,14],'5':[13,14]},anzahl:2},
+    {id:110,name:'Molenreinigung',adresse:'Ort variiert',activeDays:[1,2,3,4,5],stammProTag:{'1':[15,16],'2':[15,16],'3':[15,16],'4':[15,16],'5':[15,16]},anzahl:2},
+    {id:111,name:'Seeht',adresse:'',activeDays:[],stammProTag:{},anzahl:2},
+    {id:112,name:'Baustelle Hohn',adresse:'',activeDays:[1,2,3,4,5],stammProTag:{'1':[17,20],'2':[17,20],'3':[17,20],'4':[17,20],'5':[17,20]},anzahl:2},
+  ],
+  termine:[],
+  plan:{}
+};
+
+let S={mitarbeiter:[],standorte:[],termine:[],plan:{},abwesenheit:{}};
+try{const d=localStorage.getItem('ep5');if(d)S=JSON.parse(d);}catch(e){}
+if(!S.mitarbeiter.length){S.mitarbeiter=INITIAL.mitarbeiter.map(m=>({...m}));S.standorte=INITIAL.standorte.map(s=>({...s,stammProTag:{...s.stammProTag}}));S.termine=[];save();}
+if(!S.abwesenheit)S.abwesenheit={};
+let tmpMaSkills=[],tmpStDays=[],tmpStStammProTag={},tmpTrMa=[];
+
+function save(){try{localStorage.setItem('ep5',JSON.stringify(S));}catch(e){}}
+const COLORS=['#25d366','#60a5fa','#f59e0b','#ef4444','#a78bfa','#ec4899','#34d399','#fb923c','#38bdf8','#818cf8','#f87171','#4ade80','#e879f9','#fbbf24','#2dd4bf','#f97316','#a3e635','#22d3ee','#c084fc','#fb7185'];
+function rndColor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffffffff;return COLORS[Math.abs(h)%COLORS.length];}
+function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);}
+function today(){return new Date().toISOString().slice(0,10);}
+function dow(d){return new Date(d+'T12:00:00').getDay();}
+function weekOfMonth(ds){return Math.ceil(new Date(ds+'T12:00:00').getDate()/7);}
+function fmtDate(d){return new Date(d+'T12:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function maById(id){return S.mitarbeiter.find(m=>m.id==id);}
+function stById(id){return S.standorte.find(s=>s.id==id);}
+function isStActive(st,ds){return (st.activeDays||[]).includes(dow(ds));}
+function getStamm(st,ds){const d=dow(ds);return (st.stammProTag&&st.stammProTag[d])||[];}
+function isTerminActive(tr,ds){
+  const d=dow(ds);
+  const trDays=tr.days||[tr.dow].filter(x=>x!==undefined);
+  if(!trDays.includes(d))return false;
+  if(!tr.weeks||!tr.weeks.length||tr.weeks.includes(0))return true;
+  return tr.weeks.includes(weekOfMonth(ds));
+}
+// Abwesenheit: S.abwesenheit = { "2026-03-16": { maId: {grund:'krank'|'frei'|'urlaub'} } }
+function isAbwesend(maId,ds){return !!(S.abwesenheit[ds]&&S.abwesenheit[ds][maId]);}
+function getAbwGrund(maId,ds){return S.abwesenheit[ds]&&S.abwesenheit[ds][maId]?S.abwesenheit[ds][maId].grund:null;}
+function setAbwesenheit(maId,ds,grund){
+  if(!S.abwesenheit[ds])S.abwesenheit[ds]={};
+  S.abwesenheit[ds][maId]={grund};
+  // Remove from plan if assigned
+  if(S.plan[ds])Object.keys(S.plan[ds]).forEach(k=>{S.plan[ds][k]=S.plan[ds][k].map(x=>x==maId?null:x);});
+  save();renderPlan();
+}
+function removeAbwesenheit(maId,ds){
+  if(S.abwesenheit[ds])delete S.abwesenheit[ds][maId];
+  save();renderPlan();
+}
+function tagEl(l,c,fn){return `<span class="tag" style="background:${c}22;color:${c};border:1px solid ${c}44"${fn?` onclick="${fn}"`:''} >${l}</span>`;}
+
+// WOCHENTAG PICKER (Standort)
+function toggleDay(el){el.classList.toggle('active');tmpStDays=Array.from(document.querySelectorAll('#st-days .day-pill.active')).map(p=>parseInt(p.dataset.day));renderStammProTagEditor();}
+function setAllDays(days){document.querySelectorAll('#st-days .day-pill').forEach(p=>{p.classList.toggle('active',days.includes(parseInt(p.dataset.day)));});tmpStDays=[...days];renderStammProTagEditor();}
+function renderStammProTagEditor(){
+  const el=document.getElementById('st-stamm-pro-tag');
+  if(!tmpStDays.length){el.innerHTML='<div style="font-size:11px;color:var(--muted)">Wähle erst Wochentage aus.</div>';return;}
+  el.innerHTML=tmpStDays.sort((a,b)=>a-b).map(d=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <span style="font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;width:22px">${DAYS[d]}</span>
+      <input style="flex:1;font-size:11px;padding:6px 10px" placeholder="Namen kommagetrennt ..." id="spt-inp-${d}" value="${(tmpStStammProTag[d]||[]).map(id=>{const m=maById(id);return m?m.name:'';}).filter(Boolean).join(', ')}" list="ma-datalist">
+    </div>`).join('');
+}
+
+// MITARBEITER
+function addMaSkill(){const v=document.getElementById('ma-skill').value.trim();if(!v||tmpMaSkills.includes(v))return;tmpMaSkills.push(v);document.getElementById('ma-skill').value='';renderTmpTags('ma-skill-tags',tmpMaSkills,'removeMaSkill','#25d366');}
+function removeMaSkill(s){tmpMaSkills=tmpMaSkills.filter(x=>x!==s);renderTmpTags('ma-skill-tags',tmpMaSkills,'removeMaSkill','#25d366');}
+function renderTmpTags(elId,arr,fn,c){document.getElementById(elId).innerHTML=arr.map(s=>tagEl(s+' ✕',c,`${fn}('${s.replace(/'/g,"\\'")}')`)).join('');}
+function addMitarbeiter(){
+  const name=document.getElementById('ma-name').value.trim();if(!name)return;
+  S.mitarbeiter.push({id:Date.now(),name,tel:document.getElementById('ma-tel').value.trim(),skills:[...tmpMaSkills],color:rndColor(name)});
+  tmpMaSkills=[];document.getElementById('ma-name').value='';document.getElementById('ma-tel').value='';document.getElementById('ma-skill-tags').innerHTML='';
+  save();renderMitarbeiter();updateDatalists();
+}
+function deleteMitarbeiter(id){
+  const m=maById(id);if(!m)return;
+  const row=document.getElementById(`ma-row-${id}`);
+  row.innerHTML=`<div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:13px">⚠️ <strong>${m.name}</strong> wirklich löschen?</span>
+    <button class="btn btn-danger" style="font-size:12px" onclick="confirmDeleteMa(${id})">Ja, löschen</button>
+    <button class="btn btn-ghost" style="font-size:12px" onclick="renderMitarbeiter()">Abbrechen</button>
+  </div>`;
+}
+function confirmDeleteMa(id){
+  S.mitarbeiter=S.mitarbeiter.filter(m=>m.id!=id);
+  S.standorte.forEach(st=>{Object.keys(st.stammProTag||{}).forEach(k=>{st.stammProTag[k]=(st.stammProTag[k]||[]).filter(x=>x!=id);});});
+  Object.keys(S.plan).forEach(d=>{Object.keys(S.plan[d]).forEach(k=>{S.plan[d][k]=S.plan[d][k].map(x=>x==id?null:x);});});
+  save();renderMitarbeiter();renderPlan();updateDatalists();
+}
+function renderMitarbeiter(){
+  document.getElementById('ma-count').textContent=S.mitarbeiter.length;
+  const el=document.getElementById('ma-list');
+  if(!S.mitarbeiter.length){el.innerHTML=`<div class="empty-state"><div class="e">👤</div><p>Keine Mitarbeiter</p></div>`;return;}
+  el.innerHTML=S.mitarbeiter.map(m=>`<div class="list-item" id="ma-row-${m.id}">
+    <div class="lli" style="flex:1">
+      <div class="avatar" style="background:${m.color}33;color:${m.color}">${initials(m.name)}</div>
+      <div style="flex:1">
+        <div class="item-name">${m.name}</div>
+        <div class="item-sub">${m.tel||'—'}${m.skills.length?' · '+m.skills.join(', '):''}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="openEditMa(${m.id})">✏️</button>
+      <button class="btn btn-danger" onclick="deleteMitarbeiter(${m.id})">✕</button>
+    </div>
+  </div>`).join('');
+}
+function openEditMa(id){
+  const m=maById(id);if(!m)return;
+  const row=document.getElementById(`ma-row-${m.id}`);
+  row.innerHTML=`
+    <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;gap:6px">
+        <input id="edit-ma-name-${id}" value="${m.name}" placeholder="Name" style="flex:1">
+        <input id="edit-ma-tel-${id}" value="${m.tel||''}" placeholder="+49 ..." style="flex:1">
+      </div>
+      <input id="edit-ma-skills-${id}" value="${m.skills.join(', ')}" placeholder="Qualifikationen, kommagetrennt ...">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary" style="flex:1;font-size:12px" onclick="saveEditMa(${id})">✅ Speichern</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="renderMitarbeiter()">Abbrechen</button>
+      </div>
+    </div>`;
+}
+function saveEditMa(id){
+  const m=maById(id);if(!m)return;
+  const name=document.getElementById(`edit-ma-name-${id}`).value.trim();
+  if(!name)return;
+  m.name=name;
+  m.tel=document.getElementById(`edit-ma-tel-${id}`).value.trim();
+  m.skills=document.getElementById(`edit-ma-skills-${id}`).value.split(',').map(s=>s.trim()).filter(Boolean);
+  save();renderMitarbeiter();updateDatalists();
+}
+function updateDatalists(){
+  ['ma-datalist','ma-datalist2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=S.mitarbeiter.map(m=>`<option value="${m.name}">`).join('');});
+}
+
+// STANDORTE
+function addStandort(){
+  const name=document.getElementById('st-name').value.trim();if(!name)return;
+  tmpStDays.forEach(d=>{const inp=document.getElementById(`spt-inp-${d}`);if(inp){const ids=inp.value.split(',').map(n=>n.trim()).filter(Boolean).map(n=>{const m=S.mitarbeiter.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:null;}).filter(Boolean);tmpStStammProTag[d]=ids;}});
+  S.standorte.push({id:Date.now(),name,adresse:document.getElementById('st-adresse').value.trim(),activeDays:[...tmpStDays],stammProTag:{...tmpStStammProTag},anzahl:parseInt(document.getElementById('st-anzahl').value)||2});
+  tmpStDays=[];tmpStStammProTag={};
+  document.getElementById('st-name').value='';document.getElementById('st-adresse').value='';document.getElementById('st-anzahl').value='2';
+  document.querySelectorAll('#st-days .day-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('st-stamm-pro-tag').innerHTML='<div style="font-size:11px;color:var(--muted)">Wähle erst Wochentage aus.</div>';
+  save();renderStandorte();renderPlan();updateTerminStandortSelect();
+}
+function deleteStandort(id){
+  const st=stById(id);if(!st)return;
+  const row=document.getElementById(`st-row-${id}`);
+  if(!row){// fallback if no row id
+    S.standorte=S.standorte.filter(s=>s.id!=id);
+    Object.keys(S.plan).forEach(d=>{delete S.plan[d][id];});
+    save();renderStandorte();renderPlan();updateTerminStandortSelect();return;
+  }
+  row.innerHTML=`<div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:13px">⚠️ <strong>${st.name}</strong> wirklich löschen?</span>
+    <button class="btn btn-danger" style="font-size:12px" onclick="confirmDeleteSt(${id})">Ja, löschen</button>
+    <button class="btn btn-ghost" style="font-size:12px" onclick="renderStandorte()">Abbrechen</button>
+  </div>`;
+}
+function confirmDeleteSt(id){
+  S.standorte=S.standorte.filter(s=>s.id!=id);
+  Object.keys(S.plan).forEach(d=>{delete S.plan[d][id];});
+  save();renderStandorte();renderPlan();updateTerminStandortSelect();
+}
+function renderStandorte(){
+  document.getElementById('st-count').textContent=S.standorte.length;
+  const el=document.getElementById('st-list');
+  if(!S.standorte.length){el.innerHTML=`<div class="empty-state"><div class="e">📍</div><p>Keine Standorte</p></div>`;return;}
+  el.innerHTML=S.standorte.map(st=>{
+    const dayLabels=(st.activeDays||[]).sort((a,b)=>a-b).map(d=>DAYS[d]).join(' · ')||'Manuell';
+    let stammHtml='';
+    (st.activeDays||[]).sort((a,b)=>a-b).forEach(d=>{
+      const ids=st.stammProTag&&st.stammProTag[d]||[];if(!ids.length)return;
+      const chips=ids.map(id=>{const m=maById(id);return m?`<span style="font-size:10px;background:${m.color}22;color:${m.color};padding:2px 7px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+      stammHtml+=`<div style="display:flex;align-items:center;gap:5px;margin-top:4px"><span style="font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;width:22px">${DAYS[d]}</span><div style="display:flex;flex-wrap:wrap;gap:3px">${chips}</div></div>`;
+    });
+    return `<div class="list-item" style="align-items:flex-start" id="st-row-${st.id}"><div class="lli" style="flex:1">
+      <div class="avatar" style="background:#60a5fa22;color:#60a5fa;margin-top:2px">📍</div>
+      <div style="flex:1"><div class="item-name">${st.name}</div><div class="item-sub">${dayLabels} · ${st.anzahl} MA${st.adresse?' · '+st.adresse:''}</div>${stammHtml}</div>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0;margin-top:2px">
+      <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="openEditSt(${st.id})">✏️</button>
+      <button class="btn btn-danger" onclick="deleteStandort(${st.id})">✕</button>
+    </div></div>`;
+  }).join('');
+}
+function openEditSt(id){
+  const st=stById(id);if(!st)return;
+  const stammByDay=Object.entries(st.stammProTag||{}).map(([d,ids])=>{
+    const names=ids.map(id=>{const m=maById(id);return m?m.name:'';}).filter(Boolean).join(', ');
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+      <span style="font-size:11px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;width:22px">${DAYS[d]}</span>
+      <input style="flex:1;font-size:11px;padding:5px 9px" id="edit-st-stamm-${id}-${d}" value="${names}" placeholder="Namen kommagetrennt ..." list="ma-datalist">
+    </div>`;
+  }).join('');
+  const dayPills=['Mo','Di','Mi','Do','Fr','Sa','So'].map((label,i)=>{
+    const dayNum=[1,2,3,4,5,6,0][i];
+    const active=(st.activeDays||[]).includes(dayNum)?'active':'';
+    return `<span class="day-pill ${active}" data-day="${dayNum}" onclick="this.classList.toggle('active')" style="font-size:11px;padding:4px 9px">${label}</span>`;
+  }).join('');
+  const row=document.getElementById(`st-row-${id}`);
+  row.innerHTML=`<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+    <div style="display:flex;gap:6px">
+      <input id="edit-st-name-${id}" value="${st.name}" placeholder="Name" style="flex:1">
+      <input id="edit-st-adresse-${id}" value="${st.adresse||''}" placeholder="Adresse" style="flex:1">
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input id="edit-st-anzahl-${id}" type="number" value="${st.anzahl}" min="1" style="width:70px">
+      <span style="font-size:11px;color:var(--muted)">MA</span>
+      <div class="day-picker" id="edit-st-days-${id}" style="flex:1">${dayPills}</div>
+    </div>
+    ${stammByDay?`<div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:2px">Stammteam pro Tag:</div>${stammByDay}`:''}
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-primary" style="flex:1;font-size:12px" onclick="saveEditSt(${id})">✅ Speichern</button>
+      <button class="btn btn-ghost" style="font-size:12px" onclick="renderStandorte()">Abbrechen</button>
+    </div>
+  </div>`;
+}
+function saveEditSt(id){
+  const st=stById(id);if(!st)return;
+  st.name=document.getElementById(`edit-st-name-${id}`).value.trim()||st.name;
+  st.adresse=document.getElementById(`edit-st-adresse-${id}`).value.trim();
+  st.anzahl=parseInt(document.getElementById(`edit-st-anzahl-${id}`).value)||st.anzahl;
+  st.activeDays=Array.from(document.querySelectorAll(`#edit-st-days-${id} .day-pill.active`)).map(p=>parseInt(p.dataset.day));
+  // Update stammProTag for each active day
+  st.activeDays.forEach(d=>{
+    const inp=document.getElementById(`edit-st-stamm-${id}-${d}`);
+    if(inp){const ids=inp.value.split(',').map(n=>n.trim()).filter(Boolean).map(n=>{const m=S.mitarbeiter.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:null;}).filter(Boolean);st.stammProTag[d]=ids;}
+  });
+  save();renderStandorte();renderPlan();updateTerminStandortSelect();
+}
+
+// TERMINE
+function addTrMa(){const v=document.getElementById('tr-ma-input').value.trim();if(!v||tmpTrMa.includes(v))return;tmpTrMa.push(v);document.getElementById('tr-ma-input').value='';document.getElementById('tr-ma-tags').innerHTML=tmpTrMa.map(s=>tagEl(s+' ✕','#f59e0b',`removeTrMa('${s.replace(/'/g,"\\'")}')`)).join('');}
+function removeTrMa(s){tmpTrMa=tmpTrMa.filter(x=>x!==s);document.getElementById('tr-ma-tags').innerHTML=tmpTrMa.map(s=>tagEl(s+' ✕','#f59e0b',`removeTrMa('${s.replace(/'/g,"\\'")}')`)).join('');}
+function addTermin(){
+  const name=document.getElementById('tr-name').value.trim();if(!name)return;
+  const days=Array.from(document.querySelectorAll('#tr-days .day-pill.active')).map(p=>parseInt(p.dataset.day));
+  const weeks=Array.from(document.querySelectorAll('#tr-weeks .day-pill.active')).map(p=>parseInt(p.dataset.w));
+  const maIds=tmpTrMa.map(n=>{const m=S.mitarbeiter.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:null;}).filter(Boolean);
+  S.termine.push({id:Date.now(),name,stId:document.getElementById('tr-standort').value||null,days,weeks,maIds,notiz:document.getElementById('tr-notiz').value.trim()});
+  tmpTrMa=[];document.getElementById('tr-name').value='';document.getElementById('tr-notiz').value='';document.getElementById('tr-ma-tags').innerHTML='';
+  document.querySelectorAll('#tr-days .day-pill, #tr-weeks .day-pill').forEach(p=>p.classList.remove('active'));
+  save();renderTermine();
+}
+function deleteTermin(id){
+  const tr=S.termine.find(t=>t.id==id);if(!tr)return;
+  const row=document.getElementById(`tr-row-${id}`);
+  if(!row){S.termine=S.termine.filter(t=>t.id!=id);save();renderTermine();return;}
+  row.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:13px">⚠️ <strong>${tr.name}</strong> löschen?</span>
+    <button class="btn btn-danger" style="font-size:12px" onclick="confirmDeleteTermin(${id})">Ja</button>
+    <button class="btn btn-ghost" style="font-size:12px" onclick="renderTermine()">Abbrechen</button>
+  </div>`;
+}
+function confirmDeleteTermin(id){S.termine=S.termine.filter(t=>t.id!=id);save();renderTermine();}
+function renderTermine(){
+  document.getElementById('tr-count').textContent=S.termine.length;
+  const el=document.getElementById('tr-list');
+  if(!S.termine.length){el.innerHTML=`<div class="empty-state"><div class="e">🔁</div><p>Noch keine Termine</p></div>`;return;}
+  const wl={0:'Alle',1:'1.',2:'2.',3:'3.',4:'4.'};
+  el.innerHTML=S.termine.map(tr=>{
+    const st=tr.stId?stById(tr.stId):null;
+    const maChips=(tr.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:10px;background:${m.color}22;color:${m.color};padding:2px 7px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+    const trDays=(tr.days||[tr.dow].filter(x=>x!==undefined)).map(d=>DAYS[d]).join('+');
+    const weeksStr=tr.weeks&&tr.weeks.length?tr.weeks.map(w=>wl[w]).join(', '):'Jede Woche';
+    return `<div class="termin-item" id="tr-row-${tr.id}"><div class="termin-header">
+      <div><div class="termin-name">🔁 ${tr.name}</div><div class="termin-sub">${trDays||'?'} · ${weeksStr} im Monat${st?' · '+st.name:''}${tr.notiz?' · '+tr.notiz:''}</div></div>
+      <div style="display:flex;gap:6px;align-items:center"><span class="termin-badge">${trDays||'?'}</span><button class="btn btn-danger" onclick="deleteTermin(${tr.id})">✕</button></div>
+    </div>${maChips?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${maChips}</div>`:'<div style="font-size:11px;color:var(--muted)">Keine MA zugewiesen</div>'}</div>`;
+  }).join('');
+}
+function updateTerminStandortSelect(){
+  const sel=document.getElementById('tr-standort');
+  sel.innerHTML='<option value="">— kein fester Standort —</option>'+S.standorte.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+// TAGESPLAN
+function initPlanDate(ds){
+  if(!S.plan[ds])S.plan[ds]={};
+  S.standorte.forEach(st=>{if(isStActive(st,ds)&&S.plan[ds][st.id]===undefined)S.plan[ds][st.id]=Array(st.anzahl).fill(null);});
+}
+function renderPlan(){
+  const ds=document.getElementById('plan-datum').value;
+  const el=document.getElementById('plan-content');
+  const hint=document.getElementById('plan-termine-hint');
+  const abwBar=document.getElementById('abwesenheit-bar');
+  if(!ds){el.innerHTML=`<div class="empty-state"><div class="e">📅</div><p>Datum wählen</p></div>`;hint.innerHTML='';abwBar.innerHTML='';return;}
+  if(!S.standorte.length){el.innerHTML=`<div class="empty-state"><div class="e">📍</div><p>Zuerst Standorte anlegen</p></div>`;hint.innerHTML='';abwBar.innerHTML='';return;}
+  initPlanDate(ds);
+  const plan=S.plan[ds];
+
+  // --- Abwesenheit Bar ---
+  const abwHeute=S.abwesenheit[ds]||{};
+  const abwIds=Object.keys(abwHeute).map(Number);
+  const grundLabel={krank:'🤒 Krank',frei:'🏖 Frei',urlaub:'✈️ Urlaub'};
+  const grundClass={krank:'abw-chip-krank',frei:'abw-chip-frei',urlaub:'abw-chip-urlaub'};
+  let abwHtml=`<div class="abw-bar">
+    <span class="abw-bar-label">⛔ Nicht verfügbar</span>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;flex:1">`;
+  if(abwIds.length){
+    abwIds.forEach(maId=>{const m=maById(maId);if(!m)return;const g=abwHeute[maId].grund;abwHtml+=`<span class="abw-chip ${grundClass[g]||'abw-chip-frei'}">${grundLabel[g]||g}: ${m.name}<button onclick="removeAbwesenheit(${maId},'${ds}')" title="Entfernen">✕</button></span>`;});
+  } else {
+    abwHtml+=`<span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Alle verfügbar</span>`;
+  }
+  abwHtml+=`</div></div>
+  <div class="abw-add">
+    <select class="abw-select" id="abw-ma-sel"><option value="">Mitarbeiter wählen ...</option>${S.mitarbeiter.filter(m=>!isAbwesend(m.id,ds)).map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select>
+    <select class="abw-select" id="abw-grund-sel"><option value="krank">🤒 Krank</option><option value="frei">🏖 Frei</option><option value="urlaub">✈️ Urlaub</option></select>
+    <button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="addAbwesenheitFromBar('${ds}')">+ Eintragen</button>
+  </div>`;
+  abwBar.innerHTML=abwHtml;
+
+  const aktiveTermine=S.termine.filter(tr=>isTerminActive(tr,ds));
+  hint.innerHTML=aktiveTermine.length?`<div style="margin-bottom:14px">${aktiveTermine.map(tr=>{
+    const maChips=(tr.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:11px;background:${m.color}22;color:${m.color};padding:2px 8px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+    return `<div class="info-box" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>🔁 <strong>${tr.name}</strong>${tr.notiz?' · '+tr.notiz:''}</span><div style="display:flex;flex-wrap:wrap;gap:4px">${maChips||'<span style="color:var(--muted)">Keine MA</span>'}</div></div>`;
+  }).join('')}</div>`:'';
+
+  const activeIds=new Set([...S.standorte.filter(st=>isStActive(st,ds)).map(st=>st.id),...Object.keys(plan).map(Number).filter(id=>S.standorte.find(s=>s.id==id))]);
+  const assignedToday=()=>Object.values(plan).flat().filter(x=>x!==null);
+  let html='<div class="plan-grid">';
+  activeIds.forEach(stId=>{
+    const st=stById(stId);if(!st)return;
+    const slots=plan[stId]||Array(st.anzahl).fill(null);
+    const filled=slots.filter(x=>x!==null).length,total=st.anzahl;
+    const badge=filled>=total?`<span class="plan-badge badge-ok">✓ ${filled}/${total}</span>`:filled>0?`<span class="plan-badge badge-warn">⚠ ${filled}/${total}</span>`:`<span class="plan-badge badge-err">✕ 0/${total}</span>`;
+    const at=assignedToday();const stamm=getStamm(st,ds);
+    // Exclude absent workers from suggestions
+    const stammFree=S.mitarbeiter.filter(m=>!at.includes(m.id)&&stamm.includes(m.id)&&!isAbwesend(m.id,ds));
+    const otherFree=S.mitarbeiter.filter(m=>!at.includes(m.id)&&!stamm.includes(m.id)&&!isAbwesend(m.id,ds));
+    html+=`<div class="plan-standort"><div class="plan-st-header"><div><div class="plan-st-name">📍 ${st.name}</div>${st.adresse?`<div class="plan-st-sub">${st.adresse}</div>`:''}</div>${badge}</div>`;
+    slots.forEach((maId,idx)=>{
+      const ma=maId?maById(maId):null;
+      const abwGrund=ma?getAbwGrund(ma.id,ds):null;
+      html+=`<div class="ma-slot"><select onchange="assignSlot(${stId},${idx},this.value,'${ds}')" ${abwGrund?'style="border-color:var(--danger)"':''}>
+        <option value="">— frei —</option>
+        <optgroup label="Stammteam">${S.mitarbeiter.filter(m=>stamm.includes(m.id)).map(m=>{const abw=getAbwGrund(m.id,ds);return `<option value="${m.id}"${m.id==maId?' selected':''}${abw?' disabled':''} >${m.name}${abw?' ('+abw+')':''}</option>`;}).join('')}</optgroup>
+        <optgroup label="Alle anderen">${S.mitarbeiter.filter(m=>!stamm.includes(m.id)).map(m=>{const abw=getAbwGrund(m.id,ds);return `<option value="${m.id}"${m.id==maId?' selected':''}${abw?' disabled':''} >${m.name}${abw?' ('+abw+')':''}</option>`;}).join('')}</optgroup>
+      </select>${ma?`<div class="avatar" style="background:${abwGrund?'#ef444433':ma.color+'33'};color:${abwGrund?'var(--danger)':ma.color};flex-shrink:0;font-size:11px" title="${abwGrund||''}">${abwGrund?'⛔':initials(ma.name)}</div>`:''}</div>`;
+    });
+    html+=`<button class="ma-slot-empty" onclick="addSlot(${stId},'${ds}')">＋ Platz hinzufügen</button>`;
+    if(stammFree.length){html+=`<div class="suggest-section"><div class="suggest-label">🏠 Stammteam frei</div><div class="suggest-bar">`;stammFree.forEach(m=>{html+=`<span class="suggest-chip" style="background:${m.color}22;color:${m.color};border-color:${m.color}55" onclick="quickAssign(${stId},'${ds}',${m.id})">${m.name} +</span>`;});html+=`</div></div>`;}
+    if(otherFree.length&&filled<total){html+=`<div class="suggest-section"><div class="suggest-label">👤 Weitere frei</div><div class="suggest-bar">`;otherFree.slice(0,5).forEach(m=>{html+=`<span class="suggest-chip" style="background:${m.color}11;color:${m.color};border-color:${m.color}33" onclick="quickAssign(${stId},'${ds}',${m.id})">${m.name} +</span>`;});html+=`</div></div>`;}
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  const inactive=S.standorte.filter(st=>!isStActive(st,ds)&&!plan[st.id]);
+  if(inactive.length){html+=`<div style="margin-top:16px;padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">➕ Weitere Standorte für heute</div><div style="display:flex;flex-wrap:wrap;gap:7px">`;inactive.forEach(st=>{html+=`<button class="btn btn-ghost" style="font-size:12px" onclick="addManualStandort(${st.id},'${ds}')">+ ${st.name}</button>`;});html+=`</div></div>`;}
+  el.innerHTML=html;
+  const allSlots=Object.values(plan).flat();
+  document.getElementById('plan-status').textContent=`${allSlots.filter(x=>x!==null).length}/${allSlots.length} besetzt · ${abwIds.length?abwIds.length+' abwesend':''}`;
+}
+function addAbwesenheitFromBar(ds){
+  const maId=parseInt(document.getElementById('abw-ma-sel').value);
+  const grund=document.getElementById('abw-grund-sel').value;
+  if(!maId)return;
+  setAbwesenheit(maId,ds,grund);
+}
+function assignSlot(stId,idx,val,ds){S.plan[ds][stId][idx]=val?parseInt(val):null;save();renderPlan();}
+function addSlot(stId,ds){if(!S.plan[ds][stId])S.plan[ds][stId]=[];S.plan[ds][stId].push(null);save();renderPlan();}
+function addManualStandort(stId,ds){const st=stById(stId);if(!st)return;if(!S.plan[ds])S.plan[ds]={};S.plan[ds][stId]=Array(st.anzahl).fill(null);save();renderPlan();}
+function quickAssign(stId,ds,maId){if(isAbwesend(maId,ds))return;const slots=S.plan[ds][stId];const fi=slots.findIndex(x=>x===null);if(fi===-1)slots.push(maId);else slots[fi]=maId;save();renderPlan();}
+function clearDay(){
+  const ds=document.getElementById('plan-datum').value;if(!ds)return;
+  const el=document.getElementById('plan-content');
+  el.innerHTML=`<div style="background:var(--surface2);border:1px solid #ef444433;border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:13px">⚠️ Alle Zuweisungen für <strong>${fmtDate(ds)}</strong> löschen?</span>
+    <button class="btn btn-danger" onclick="S.plan['${ds}']={};save();renderPlan()">Ja, leeren</button>
+    <button class="btn btn-ghost" onclick="renderPlan()">Abbrechen</button>
+  </div>`;
+}
+function autoAssignStamm(){
+  const ds=document.getElementById('plan-datum').value;if(!ds)return;
+  initPlanDate(ds);const plan=S.plan[ds];
+  Object.keys(plan).forEach(k=>{plan[k]=plan[k].map(()=>null);});
+  const assigned=new Set();
+  S.standorte.filter(st=>isStActive(st,ds)||plan[st.id]).forEach(st=>{
+    if(!plan[st.id])plan[st.id]=Array(st.anzahl).fill(null);
+    getStamm(st,ds).forEach(maId=>{if(assigned.has(maId)||isAbwesend(maId,ds))return;const fi=plan[st.id].findIndex(x=>x===null);if(fi!==-1){plan[st.id][fi]=maId;assigned.add(maId);}});
+  });
+  save();renderPlan();
+}
+function autoAssign(){
+  const ds=document.getElementById('plan-datum').value;if(!ds)return;
+  initPlanDate(ds);const plan=S.plan[ds];
+  Object.keys(plan).forEach(k=>{plan[k]=plan[k].map(()=>null);});
+  const assigned=new Set();
+  const active=S.standorte.filter(st=>isStActive(st,ds)||plan[st.id]);
+  active.forEach(st=>{if(!plan[st.id])plan[st.id]=Array(st.anzahl).fill(null);getStamm(st,ds).forEach(maId=>{if(assigned.has(maId)||isAbwesend(maId,ds))return;const fi=plan[st.id].findIndex(x=>x===null);if(fi!==-1){plan[st.id][fi]=maId;assigned.add(maId);}});});
+  active.forEach(st=>{plan[st.id].forEach((_,idx)=>{if(plan[st.id][idx]!==null)return;const free=S.mitarbeiter.filter(m=>!assigned.has(m.id)&&!isAbwesend(m.id,ds));const pick=free[0];if(pick){plan[st.id][idx]=pick.id;assigned.add(pick.id);}});});
+  save();renderPlan();
+}
+
+// IMPORT (WhatsApp)
+function parseImport(){
+  const text=document.getElementById('imp-text').value.trim();if(!text)return;
+  const lines=text.split('\n').map(l=>l.trim());
+  let detectedDate=document.getElementById('imp-datum').value||today();
+  const dateRe=/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/;
+  for(const l of lines){const m=l.match(dateRe);if(m){let y=parseInt(m[3]);if(y<100)y+=2000;detectedDate=`${y}-${String(parseInt(m[2])).padStart(2,'0')}-${String(parseInt(m[1])).padStart(2,'0')}`;break;}}
+  const knownMa=S.mitarbeiter.map(m=>m.name.toLowerCase());
+  const dayNames=['montag','dienstag','mittwoch','donnerstag','freitag','samstag','sonntag'];
+  const result={};let currentSt=null;const newMA=[];const newST=[];
+  for(const line of lines){
+    if(!line)continue;const ll=line.toLowerCase();
+    if(dayNames.includes(ll)||line.match(/^\d{1,2}\.\d{1,2}\.\d{2,4}$/))continue;
+    const isKnownMa=knownMa.some(m=>ll.replace(/\s*\(.*\)/,'').trim()===m);
+    let stMatch=S.standorte.find(s=>s.name.toLowerCase()===ll||ll.startsWith(s.name.toLowerCase())||s.name.toLowerCase().startsWith(ll.split('/')[0]));
+    if(!stMatch&&!isKnownMa)stMatch=S.standorte.find(s=>ll.includes(s.name.toLowerCase().split(' ')[0]));
+    if(stMatch){currentSt=stMatch.name;if(!result[currentSt])result[currentSt]=[];}
+    else if(!isKnownMa&&line.length>1&&currentSt===null){currentSt=line;if(!result[currentSt])result[currentSt]=[];if(!S.standorte.find(s=>s.name===line)&&!newST.find(s=>s.name===line))newST.push({id:Date.now()+Math.random(),name:line,adresse:'',activeDays:[],stammProTag:{},anzahl:1});}
+    else if(currentSt&&line.length>1){
+      const cn=line.replace(/\s*\(.*\)/,'').trim();result[currentSt].push(cn);
+      if(!S.mitarbeiter.find(m=>m.name.toLowerCase()===cn.toLowerCase())&&!newMA.find(m=>m.name.toLowerCase()===cn.toLowerCase()))newMA.push({id:Date.now()+Math.random(),name:cn,tel:'',skills:[],color:rndColor(cn)});
+    }
+  }
+  const stCount=Object.keys(result).length,maCount=Object.values(result).flat().length;
+  let prev=`<div style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:12px">✅ ${stCount} Standorte, ${maCount} Einsätze · ${fmtDate(detectedDate)}</div>`;
+  Object.entries(result).forEach(([sn,names])=>{prev+=`<div style="margin-bottom:8px"><div style="font-size:13px;font-weight:700">📍 ${sn}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:2px">${names.join(', ')||'leer'}</div></div>`;});
+  if(newMA.length)prev+=`<div style="margin-top:10px;padding:9px 12px;background:#f59e0b11;border:1px solid #f59e0b33;border-radius:8px"><div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:4px">⚠️ Neue Mitarbeiter:</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">${newMA.map(m=>m.name).join(', ')}</div></div>`;
+  if(newST.length)prev+=`<div style="margin-top:6px;padding:9px 12px;background:#60a5fa11;border:1px solid #60a5fa33;border-radius:8px"><div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:4px">📍 Neue Standorte:</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">${newST.map(s=>s.name).join(', ')}</div></div>`;
+  const rj=JSON.stringify(result).replace(/"/g,'&quot;');const nmj=JSON.stringify(newMA).replace(/"/g,'&quot;');const nsj=JSON.stringify(newST).replace(/"/g,'&quot;');
+  prev+=`<div style="margin-top:12px"><button class="btn btn-primary" onclick="confirmImport('${detectedDate}',JSON.parse(this.dataset.r),JSON.parse(this.dataset.m),JSON.parse(this.dataset.s))" data-r="${rj}" data-m="${nmj}" data-s="${nsj}">✅ Importieren</button></div>`;
+  document.getElementById('imp-preview').innerHTML=prev;
+}
+function confirmImport(detectedDate,result,newMA,newST){
+  newMA.forEach(m=>{if(!S.mitarbeiter.find(x=>x.name.toLowerCase()===m.name.toLowerCase()))S.mitarbeiter.push({...m,id:Date.now()+Math.random()});});
+  newST.forEach(st=>{if(!S.standorte.find(x=>x.name===st.name))S.standorte.push({...st,id:Date.now()+Math.random()});});
+  if(!S.plan[detectedDate])S.plan[detectedDate]={};
+  Object.entries(result).forEach(([stName,names])=>{const st=S.standorte.find(s=>s.name===stName);if(!st)return;const maIds=names.map(n=>{const m=S.mitarbeiter.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:null;}).filter(Boolean);S.plan[detectedDate][st.id]=maIds.length?maIds:Array(st.anzahl).fill(null);});
+  save();renderMitarbeiter();renderStandorte();updateDatalists();updateTerminStandortSelect();
+  document.getElementById('plan-datum').value=detectedDate;
+  document.getElementById('imp-result').innerHTML=`<div class="ok-box">✅ Plan für ${fmtDate(detectedDate)} importiert!</div>`;
+  document.getElementById('imp-preview').innerHTML=`<div class="ok-box">✅ Fertig! Wechsle zum Tagesplan.</div>`;
+}
+
+// WHATSAPP
+function generateWA(){
+  const ds=document.getElementById('wa-datum').value;if(!ds)return;
+  initPlanDate(ds);const plan=S.plan[ds];
+  const intro=document.getElementById('wa-intro').value,outro=document.getElementById('wa-outro').value;
+  let text='';if(intro)text+=intro+'\n\n';
+  const dateObj=new Date(ds+'T12:00:00');
+  text+=`${dateObj.toLocaleDateString('de-DE',{weekday:'long'})}\n${dateObj.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'})}\n\n`;
+  const konflikte=[];
+  S.standorte.forEach(st=>{
+    const slots=plan[st.id];if(!slots&&!isStActive(st,ds))return;
+    const assigned=(slots||[]).filter(x=>x!==null);
+    text+=`${st.name}\n`;assigned.forEach(maId=>{const ma=maById(maId);if(ma)text+=`${ma.name}\n`;});text+='\n';
+    if(!assigned.length&&isStActive(st,ds))konflikte.push(`🔴 ${st.name}: unbesetzt`);
+    else if(assigned.length<st.anzahl&&assigned.length>0)konflikte.push(`⚠️ ${st.name}: ${assigned.length}/${st.anzahl}`);
+  });
+  S.termine.filter(tr=>isTerminActive(tr,ds)).forEach(tr=>{text+=`${tr.name}\n`;(tr.maIds||[]).forEach(id=>{const m=maById(id);if(m)text+=`${m.name}\n`;});text+='\n';});
+  if(outro)text+=outro;
+  document.getElementById('wa-text').textContent=text;
+  document.getElementById('wa-time').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('wa-konflikte').innerHTML=konflikte.length?konflikte.map(k=>`<div class="conflict-box">${k}</div>`).join(''):`<div class="ok-box">✅ Alle Standorte besetzt!</div>`;
+}
+function copyWA(){
+  const t=document.getElementById('wa-text').textContent;
+  navigator.clipboard.writeText(t).then(()=>{const b=document.querySelector('.copy-btn');b.innerHTML='<span>✅</span> Kopiert!';setTimeout(()=>{b.innerHTML='<span>📲</span> In Zwischenablage kopieren';},2000);})
+  .catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
+}
+
+// ============================
+// BACKUP / EXPORT / IMPORT
+// ============================
+function exportData(){
+  // PC/Mac: Blob download
+  const json=JSON.stringify(S,null,2);
+  const ts=new Date().toISOString().slice(0,10);
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`einsatzplaner_${ts}.json`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    document.getElementById('export-status').innerHTML=`<div class="ok-box">✅ Datei gespeichert: einsatzplaner_${ts}.json</div>`;
+  }catch(e){
+    exportDataiOS();
+  }
+}
+function exportDataiOS(){
+  // iPhone/iPad: show text to copy manually
+  const json=JSON.stringify(S);
+  const box=document.getElementById('ios-export-box');
+  const ta=document.getElementById('ios-export-text');
+  ta.value=json;
+  box.style.display='block';
+  ta.focus();ta.select();
+  document.getElementById('export-status').innerHTML=`<div class="info-box">👇 Text unten kopieren und sicher aufbewahren (Notizen, Mail, iCloud etc.)</div>`;
+}
+function selectAndCopyExport(){
+  const ta=document.getElementById('ios-export-text');
+  ta.focus();ta.select();
+  try{
+    // Modern API
+    navigator.clipboard.writeText(ta.value).then(()=>{
+      document.getElementById('export-status').innerHTML=`<div class="ok-box">✅ In Zwischenablage kopiert!</div>`;
+    }).catch(()=>{ fallbackCopyExport(ta); });
+  }catch(e){ fallbackCopyExport(ta); }
+}
+function fallbackCopyExport(ta){
+  try{document.execCommand('copy');document.getElementById('export-status').innerHTML=`<div class="ok-box">✅ Kopiert! Text in Notizen/Mail einfügen.</div>`;}
+  catch(e){document.getElementById('export-status').innerHTML=`<div class="info-box">ℹ️ Bitte Text manuell markieren und kopieren.</div>`;}
+}
+function loadBackupFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{document.getElementById('backup-json-input').value=e.target.result;};
+  reader.readAsText(file);
+}
+let pendingImportData=null;
+function importFromText(){
+  const text=document.getElementById('backup-json-input').value.trim();
+  if(!text){document.getElementById('import-backup-status').innerHTML=`<div class="conflict-box">❌ Kein Text eingegeben</div>`;return;}
+  try{
+    const data=JSON.parse(text);
+    if(!data.mitarbeiter||!data.standorte){throw new Error('Ungültiges Format');}
+    pendingImportData=data;
+    document.getElementById('import-backup-status').innerHTML=`<div class="warn-box" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      ⚠️ ${data.mitarbeiter.length} Mitarbeiter, ${data.standorte.length} Standorte, ${(data.termine||[]).length} Termine werden geladen. Aktuelle Daten werden überschrieben.
+      <button class="btn btn-danger" style="font-size:12px" onclick="applyBackupData()">Ja, laden</button>
+      <button class="btn btn-ghost" style="font-size:12px" onclick="pendingImportData=null;document.getElementById('import-backup-status').innerHTML=''">Abbrechen</button>
+    </div>`;
+  }catch(e){document.getElementById('import-backup-status').innerHTML=`<div class="conflict-box">❌ Fehler: ${e.message}</div>`;}
+}
+function applyBackupData(){
+  if(!pendingImportData)return;
+  S=pendingImportData;pendingImportData=null;
+  if(!S.termine)S.termine=[];if(!S.plan)S.plan={};if(!S.abwesenheit)S.abwesenheit={};
+  save();renderMitarbeiter();renderStandorte();renderTermine();updateDatalists();updateTerminStandortSelect();renderPlan();renderBackupStats();
+  document.getElementById('import-backup-status').innerHTML=`<div class="ok-box">✅ Daten geladen! ${S.mitarbeiter.length} Mitarbeiter, ${S.standorte.length} Standorte.</div>`;
+}
+function renderBackupStats(){
+  const planDays=Object.keys(S.plan).length;
+  const totalAssignments=Object.values(S.plan).reduce((sum,day)=>sum+Object.values(day).flat().filter(x=>x!==null).length,0);
+  document.getElementById('backup-stats').innerHTML=
+    `👤 Mitarbeiter: ${S.mitarbeiter.length}\n`+
+    `📍 Standorte: ${S.standorte.length}\n`+
+    `🔁 Termine: ${(S.termine||[]).length}\n`+
+    `📅 Gespeicherte Tage: ${planDays}\n`+
+    `✅ Gesamte Einsätze: ${totalAssignments}`;
+}
+
+// NAV
+function nav(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='standorte')updateDatalists();
+  if(name==='backup')renderBackupStats();
+}
+
+// INIT
+document.getElementById('plan-datum').value=today();
+document.getElementById('wa-datum').value=today();
+document.getElementById('imp-datum').value=today();
+renderMitarbeiter();renderStandorte();renderTermine();updateDatalists();updateTerminStandortSelect();renderPlan();
+</script>
+</body>
+</html>
