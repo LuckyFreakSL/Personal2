@@ -100,7 +100,7 @@ option.gesperrt{color:#5a6272!important;}
 </style>
 </head>
 <body>
-
+ 
 <div class="header">
   <div class="logo">📋</div>
   <h1>Einsatz<span>Planer</span></h1>
@@ -108,15 +108,16 @@ option.gesperrt{color:#5a6272!important;}
     <button class="tab active" onclick="nav('plan',this)">Tagesplan</button>
     <button class="tab" onclick="nav('mitarbeiter',this)">Mitarbeiter</button>
     <button class="tab" onclick="nav('standorte',this)">Standorte</button>
+    <button class="tab" onclick="nav('einmalig',this)">📌 Einmalig</button>
     <button class="tab" onclick="nav('termine',this)">🔁 Termine</button>
     <button class="tab" onclick="nav('import',this)">📥 Import</button>
     <button class="tab" onclick="nav('whatsapp',this)">WhatsApp</button>
     <button class="tab" onclick="nav('backup',this)">💾 Backup</button>
   </div>
 </div>
-
+ 
 <div class="main">
-
+ 
 <!-- TAGESPLAN -->
 <div id="page-plan" class="page active">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
@@ -131,7 +132,7 @@ option.gesperrt{color:#5a6272!important;}
   <div id="plan-termine-hint"></div>
   <div id="plan-content"></div>
 </div>
-
+ 
 <!-- MITARBEITER -->
 <div id="page-mitarbeiter" class="page">
   <div class="grid2">
@@ -155,7 +156,7 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
 <!-- STANDORTE -->
 <div id="page-standorte" class="page">
   <div class="grid2">
@@ -193,7 +194,51 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
+<!-- EINMALIGE TERMINE -->
+<div id="page-einmalig" class="page">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Einmaliger Termin</div>
+      <div class="form-group"><label>Bezeichnung</label><input id="et-name" placeholder="z.B. Dachrinne Neustadt, TÜV Fahrzeug ..."></div>
+      <div class="form-group"><label>Standort (optional)</label><select id="et-standort"><option value="">— kein fester Standort —</option></select></div>
+      <div class="form-group">
+        <label>Terminart</label>
+        <select id="et-art" onchange="toggleEtArt()">
+          <option value="datum">Bestimmtes Datum</option>
+          <option value="kw">Kalenderwoche (KW)</option>
+        </select>
+      </div>
+      <div class="form-group" id="et-datum-group">
+        <label>Datum</label>
+        <input type="date" id="et-datum">
+      </div>
+      <div class="form-group" id="et-kw-group" style="display:none">
+        <label>Kalenderwoche</label>
+        <div style="display:flex;gap:8px">
+          <input id="et-kw" type="number" min="1" max="53" placeholder="z.B. 15" style="flex:1">
+          <input id="et-kw-jahr" type="number" placeholder="2026" style="flex:1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mitarbeiter</label>
+        <div class="skills-row">
+          <input id="et-ma-input" placeholder="Name ..." onkeydown="if(event.key==='Enter')addEtMa()" list="ma-datalist">
+          <button class="btn btn-ghost" onclick="addEtMa()">+ Add</button>
+        </div>
+        <div id="et-ma-tags" style="margin-top:8px"></div>
+      </div>
+      <div class="form-group"><label>Notiz</label><input id="et-notiz" placeholder="z.B. Leiter mitbringen, 4h Arbeit ..."></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addEinmalig()">Termin speichern</button>
+      <div id="et-status" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Alle einmaligen Termine (<span id="et-count">0</span>)</div>
+      <div id="et-list"></div>
+    </div>
+  </div>
+</div>
+ 
 <!-- TERMINE -->
 <div id="page-termine" class="page">
   <div class="grid2">
@@ -242,7 +287,7 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
 <!-- IMPORT -->
 <div id="page-import" class="page">
   <div class="grid2">
@@ -267,7 +312,7 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
 <!-- WHATSAPP -->
 <div id="page-whatsapp" class="page">
   <div class="grid2">
@@ -290,7 +335,7 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
 <!-- BACKUP -->
 <div id="page-backup" class="page">
   <div class="grid2">
@@ -310,7 +355,7 @@ option.gesperrt{color:#5a6272!important;}
           <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="selectAndCopyExport()">📋 Alles kopieren</button>
         </div>
       </div>
-
+ 
       <div class="backup-section">
         <h3>📥 Daten importieren</h3>
         <p>Lade eine zuvor exportierte JSON-Datei, oder füge den JSON-Text direkt ein. <strong style="color:var(--danger)">Achtung:</strong> Dies überschreibt alle aktuellen Daten!</p>
@@ -329,7 +374,7 @@ option.gesperrt{color:#5a6272!important;}
         <div id="import-backup-status" style="margin-top:10px"></div>
       </div>
     </div>
-
+ 
     <div>
       <div class="backup-section">
         <h3>ℹ️ Wie funktioniert das?</h3>
@@ -351,14 +396,14 @@ option.gesperrt{color:#5a6272!important;}
     </div>
   </div>
 </div>
-
+ 
 </div><!-- /main -->
 <datalist id="ma-datalist"></datalist>
-
+ 
 <script>
 const DAYS=['So','Mo','Di','Mi','Do','Fr','Sa'];
 const DAYSFULL=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-
+ 
 const INITIAL={
   mitarbeiter:[
     {id:1,name:'Thomas',tel:'',skills:[],color:'#25d366'},
@@ -402,13 +447,13 @@ const INITIAL={
   termine:[],
   plan:{}
 };
-
+ 
 let S={mitarbeiter:[],standorte:[],termine:[],plan:{},abwesenheit:{}};
 try{const d=localStorage.getItem('ep5');if(d)S=JSON.parse(d);}catch(e){}
 if(!S.mitarbeiter.length){S.mitarbeiter=INITIAL.mitarbeiter.map(m=>({...m}));S.standorte=INITIAL.standorte.map(s=>({...s,stammProTag:{...s.stammProTag}}));S.termine=[];save();}
 if(!S.abwesenheit)S.abwesenheit={};
 let tmpMaSkills=[],tmpStDays=[],tmpStStammProTag={},tmpTrMa=[];
-
+ 
 function save(){try{localStorage.setItem('ep5',JSON.stringify(S));}catch(e){}}
 const COLORS=['#25d366','#60a5fa','#f59e0b','#ef4444','#a78bfa','#ec4899','#34d399','#fb923c','#38bdf8','#818cf8','#f87171','#4ade80','#e879f9','#fbbf24','#2dd4bf','#f97316','#a3e635','#22d3ee','#c084fc','#fb7185'];
 function rndColor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffffffff;return COLORS[Math.abs(h)%COLORS.length];}
@@ -443,7 +488,7 @@ function removeAbwesenheit(maId,ds){
   save();renderPlan();
 }
 function tagEl(l,c,fn){return `<span class="tag" style="background:${c}22;color:${c};border:1px solid ${c}44"${fn?` onclick="${fn}"`:''} >${l}</span>`;}
-
+ 
 // WOCHENTAG PICKER (Standort)
 function toggleDay(el){el.classList.toggle('active');tmpStDays=Array.from(document.querySelectorAll('#st-days .day-pill.active')).map(p=>parseInt(p.dataset.day));renderStammProTagEditor();}
 function setAllDays(days){document.querySelectorAll('#st-days .day-pill').forEach(p=>{p.classList.toggle('active',days.includes(parseInt(p.dataset.day)));});tmpStDays=[...days];renderStammProTagEditor();}
@@ -456,7 +501,7 @@ function renderStammProTagEditor(){
       <input style="flex:1;font-size:11px;padding:6px 10px" placeholder="Namen kommagetrennt ..." id="spt-inp-${d}" value="${(tmpStStammProTag[d]||[]).map(id=>{const m=maById(id);return m?m.name:'';}).filter(Boolean).join(', ')}" list="ma-datalist">
     </div>`).join('');
 }
-
+ 
 // MITARBEITER
 function addMaSkill(){const v=document.getElementById('ma-skill').value.trim();if(!v||tmpMaSkills.includes(v))return;tmpMaSkills.push(v);document.getElementById('ma-skill').value='';renderTmpTags('ma-skill-tags',tmpMaSkills,'removeMaSkill','#25d366');}
 function removeMaSkill(s){tmpMaSkills=tmpMaSkills.filter(x=>x!==s);renderTmpTags('ma-skill-tags',tmpMaSkills,'removeMaSkill','#25d366');}
@@ -528,7 +573,7 @@ function saveEditMa(id){
 function updateDatalists(){
   ['ma-datalist','ma-datalist2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=S.mitarbeiter.map(m=>`<option value="${m.name}">`).join('');});
 }
-
+ 
 // STANDORTE
 function addStandort(){
   const name=document.getElementById('st-name').value.trim();if(!name)return;
@@ -626,7 +671,7 @@ function saveEditSt(id){
   });
   save();renderStandorte();renderPlan();updateTerminStandortSelect();
 }
-
+ 
 // TERMINE
 function addTrMa(){const v=document.getElementById('tr-ma-input').value.trim();if(!v||tmpTrMa.includes(v))return;tmpTrMa.push(v);document.getElementById('tr-ma-input').value='';document.getElementById('tr-ma-tags').innerHTML=tmpTrMa.map(s=>tagEl(s+' ✕','#f59e0b',`removeTrMa('${s.replace(/'/g,"\\'")}')`)).join('');}
 function removeTrMa(s){tmpTrMa=tmpTrMa.filter(x=>x!==s);document.getElementById('tr-ma-tags').innerHTML=tmpTrMa.map(s=>tagEl(s+' ✕','#f59e0b',`removeTrMa('${s.replace(/'/g,"\\'")}')`)).join('');}
@@ -671,7 +716,7 @@ function updateTerminStandortSelect(){
   const sel=document.getElementById('tr-standort');
   sel.innerHTML='<option value="">— kein fester Standort —</option>'+S.standorte.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
 }
-
+ 
 // TAGESPLAN
 function initPlanDate(ds){
   if(!S.plan[ds])S.plan[ds]={};
@@ -686,7 +731,7 @@ function renderPlan(){
   if(!S.standorte.length){el.innerHTML=`<div class="empty-state"><div class="e">📍</div><p>Zuerst Standorte anlegen</p></div>`;hint.innerHTML='';abwBar.innerHTML='';return;}
   initPlanDate(ds);
   const plan=S.plan[ds];
-
+ 
   // --- Abwesenheit Bar ---
   const abwHeute=S.abwesenheit[ds]||{};
   const abwIds=Object.keys(abwHeute).map(Number);
@@ -707,13 +752,25 @@ function renderPlan(){
     <button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="addAbwesenheitFromBar('${ds}')">+ Eintragen</button>
   </div>`;
   abwBar.innerHTML=abwHtml;
-
+ 
   const aktiveTermine=S.termine.filter(tr=>isTerminActive(tr,ds));
-  hint.innerHTML=aktiveTermine.length?`<div style="margin-bottom:14px">${aktiveTermine.map(tr=>{
-    const maChips=(tr.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:11px;background:${m.color}22;color:${m.color};padding:2px 8px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
-    return `<div class="info-box" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>🔁 <strong>${tr.name}</strong>${tr.notiz?' · '+tr.notiz:''}</span><div style="display:flex;flex-wrap:wrap;gap:4px">${maChips||'<span style="color:var(--muted)">Keine MA</span>'}</div></div>`;
-  }).join('')}</div>`:'';
-
+  const aktiveEinmalig=getEinmaligForDate(ds);
+  const hintItems=[
+    ...aktiveTermine.map(tr=>{
+      const maChips=(tr.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:11px;background:${m.color}22;color:${m.color};padding:2px 8px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+      return `<div class="info-box" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>🔁 <strong>${tr.name}</strong>${tr.notiz?' · '+tr.notiz:''}</span><div style="display:flex;flex-wrap:wrap;gap:4px">${maChips||'<span style="color:var(--muted)">Keine MA</span>'}</div></div>`;
+    }),
+    ...aktiveEinmalig.map(t=>{
+      const maChips=(t.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:11px;background:${m.color}22;color:${m.color};padding:2px 8px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+      const wann=t.art==='kw'?` · KW ${t.kw}`:'';
+      return `<div class="warn-box" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>📌 <strong>${t.name}</strong>${wann}${t.notiz?' · '+t.notiz:''}</span><div style="display:flex;flex-wrap:wrap;gap:4px">${maChips||''}</div></div>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px" onclick="planEinmaligEin(${t.id},'${ds}')">+ Einplanen</button>
+      </div>`;
+    })
+  ];
+  hint.innerHTML=hintItems.length?`<div style="margin-bottom:14px">${hintItems.join('')}</div>`:'';
+ 
   const activeIds=new Set([...S.standorte.filter(st=>isStActive(st,ds)).map(st=>st.id),...Object.keys(plan).map(Number).filter(id=>S.standorte.find(s=>s.id==id))]);
   const assignedToday=()=>Object.values(plan).flat().filter(x=>x!==null);
   let html='<div class="plan-grid">';
@@ -788,7 +845,7 @@ function autoAssign(){
   active.forEach(st=>{plan[st.id].forEach((_,idx)=>{if(plan[st.id][idx]!==null)return;const free=S.mitarbeiter.filter(m=>!assigned.has(m.id)&&!isAbwesend(m.id,ds));const pick=free[0];if(pick){plan[st.id][idx]=pick.id;assigned.add(pick.id);}});});
   save();renderPlan();
 }
-
+ 
 // IMPORT (WhatsApp)
 function parseImport(){
   const text=document.getElementById('imp-text').value.trim();if(!text)return;
@@ -831,7 +888,7 @@ function confirmImport(detectedDate,result,newMA,newST){
   document.getElementById('imp-result').innerHTML=`<div class="ok-box">✅ Plan für ${fmtDate(detectedDate)} importiert!</div>`;
   document.getElementById('imp-preview').innerHTML=`<div class="ok-box">✅ Fertig! Wechsle zum Tagesplan.</div>`;
 }
-
+ 
 // WHATSAPP
 function generateWA(){
   const ds=document.getElementById('wa-datum').value;if(!ds)return;
@@ -858,7 +915,7 @@ function copyWA(){
   navigator.clipboard.writeText(t).then(()=>{const b=document.querySelector('.copy-btn');b.innerHTML='<span>✅</span> Kopiert!';setTimeout(()=>{b.innerHTML='<span>📲</span> In Zwischenablage kopieren';},2000);})
   .catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
 }
-
+ 
 // ============================
 // BACKUP / EXPORT / IMPORT
 // ============================
@@ -940,7 +997,128 @@ function renderBackupStats(){
     `📅 Gespeicherte Tage: ${planDays}\n`+
     `✅ Gesamte Einsätze: ${totalAssignments}`;
 }
-
+ 
+// ===== EINMALIGE TERMINE =====
+function toggleEtArt(){
+  const art=document.getElementById('et-art').value;
+  document.getElementById('et-datum-group').style.display=art==='datum'?'block':'none';
+  document.getElementById('et-kw-group').style.display=art==='kw'?'block':'none';
+}
+function getISOWeek(ds){
+  const d=new Date(ds+'T12:00:00');const dayNum=d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-dayNum);
+  const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return{kw:Math.ceil((((d-yearStart)/86400000)+1)/7),jahr:d.getUTCFullYear()};
+}
+let tmpEtMa=[];
+function addEtMa(){
+  const v=document.getElementById('et-ma-input').value.trim();
+  if(!v||tmpEtMa.includes(v))return;
+  tmpEtMa.push(v);document.getElementById('et-ma-input').value='';
+  document.getElementById('et-ma-tags').innerHTML=tmpEtMa.map(s=>tagEl(s+' ✕','#60a5fa',`removeEtMa('${s.replace(/'/g,"\\'")}')`)).join('');
+}
+function removeEtMa(s){
+  tmpEtMa=tmpEtMa.filter(x=>x!==s);
+  document.getElementById('et-ma-tags').innerHTML=tmpEtMa.map(s=>tagEl(s+' ✕','#60a5fa',`removeEtMa('${s.replace(/'/g,"\\'")}')`)).join('');
+}
+function addEinmalig(){
+  const name=document.getElementById('et-name').value.trim();if(!name)return;
+  const art=document.getElementById('et-art').value;
+  const maIds=tmpEtMa.map(n=>{const m=S.mitarbeiter.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:null;}).filter(Boolean);
+  const termin={id:Date.now(),name,stId:document.getElementById('et-standort').value||null,art,maIds,notiz:document.getElementById('et-notiz').value.trim(),erledigt:false};
+  if(art==='datum'){
+    const d=document.getElementById('et-datum').value;
+    if(!d){document.getElementById('et-status').innerHTML=`<div class="conflict-box">Bitte Datum wählen</div>`;return;}
+    termin.datum=d;
+  } else {
+    const kw=parseInt(document.getElementById('et-kw').value);
+    const jahr=parseInt(document.getElementById('et-kw-jahr').value)||new Date().getFullYear();
+    if(!kw){document.getElementById('et-status').innerHTML=`<div class="conflict-box">Bitte KW eingeben</div>`;return;}
+    termin.kw=kw;termin.kwJahr=jahr;
+  }
+  if(!S.einmalig)S.einmalig=[];
+  S.einmalig.push(termin);
+  tmpEtMa=[];
+  document.getElementById('et-name').value='';document.getElementById('et-notiz').value='';
+  document.getElementById('et-datum').value='';document.getElementById('et-kw').value='';
+  document.getElementById('et-ma-tags').innerHTML='';
+  save();renderEinmalig();
+  document.getElementById('et-status').innerHTML=`<div class="ok-box">✅ Termin gespeichert!</div>`;
+  setTimeout(()=>{document.getElementById('et-status').innerHTML='';},3000);
+}
+function deleteEinmalig(id){
+  const row=document.getElementById(`et-row-${id}`);
+  if(!row){S.einmalig=S.einmalig.filter(x=>x.id!=id);save();renderEinmalig();return;}
+  row.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:13px">⚠️ Termin löschen?</span>
+    <button class="btn btn-danger" style="font-size:12px" onclick="S.einmalig=S.einmalig.filter(x=>x.id!=${id});save();renderEinmalig()">Ja</button>
+    <button class="btn btn-ghost" style="font-size:12px" onclick="renderEinmalig()">Abbrechen</button>
+  </div>`;
+}
+function markEinmaligErledigt(id){
+  const t=(S.einmalig||[]).find(x=>x.id==id);if(t)t.erledigt=!t.erledigt;save();renderEinmalig();
+}
+function getEinmaligForDate(ds){
+  if(!S.einmalig)return[];
+  const{kw,jahr}=getISOWeek(ds);
+  return S.einmalig.filter(t=>{
+    if(t.erledigt)return false;
+    if(t.art==='datum')return t.datum===ds;
+    if(t.art==='kw')return t.kw===kw&&t.kwJahr===jahr;
+    return false;
+  });
+}
+function planEinmaligEin(tId,ds){
+  const t=(S.einmalig||[]).find(x=>x.id==tId);if(!t)return;
+  initPlanDate(ds);
+  if(t.stId){
+    if(!S.plan[ds][t.stId])S.plan[ds][t.stId]=[];
+    t.maIds.forEach(maId=>{const fi=S.plan[ds][t.stId].findIndex(x=>x===null);if(fi!==-1)S.plan[ds][t.stId][fi]=maId;else S.plan[ds][t.stId].push(maId);});
+  }
+  t.erledigt=true;save();renderPlan();renderEinmalig();
+}
+function renderEinmalig(){
+  if(!S.einmalig)S.einmalig=[];
+  const countEl=document.getElementById('et-count');if(countEl)countEl.textContent=S.einmalig.length;
+  // update standort select
+  const sel=document.getElementById('et-standort');
+  if(sel)sel.innerHTML='<option value="">— kein fester Standort —</option>'+S.standorte.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const el=document.getElementById('et-list');if(!el)return;
+  if(!S.einmalig.length){el.innerHTML=`<div class="empty-state"><div class="e">📌</div><p>Keine einmaligen Termine</p></div>`;return;}
+  const now=today();
+  const aktiv=[...S.einmalig].filter(t=>!t.erledigt&&(t.art==='kw'||t.datum>=now)).sort((a,b)=>{
+    const da=a.art==='datum'?a.datum:`${a.kwJahr}-W${String(a.kw).padStart(2,'0')}`;
+    const db=b.art==='datum'?b.datum:`${b.kwJahr}-W${String(b.kw).padStart(2,'0')}`;
+    return da.localeCompare(db);
+  });
+  const ueberfaellig=S.einmalig.filter(t=>!t.erledigt&&t.art==='datum'&&t.datum<now);
+  const erledigt=S.einmalig.filter(t=>t.erledigt);
+  let html='';
+  if(ueberfaellig.length){html+=`<div style="font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Überfällig</div>`;ueberfaellig.forEach(t=>{html+=etHtml(t);});}
+  if(aktiv.length){html+=`<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin:${ueberfaellig.length?'12px':0} 0 8px">Anstehend</div>`;aktiv.forEach(t=>{html+=etHtml(t);});}
+  if(erledigt.length){html+=`<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">✅ Erledigt</div>`;erledigt.slice(0,5).forEach(t=>{html+=etHtml(t);});}
+  el.innerHTML=html;
+}
+function etHtml(t){
+  const st=t.stId?stById(t.stId):null;
+  const maChips=(t.maIds||[]).map(id=>{const m=maById(id);return m?`<span style="font-size:10px;background:${m.color}22;color:${m.color};padding:2px 7px;border-radius:12px;font-family:'DM Mono',monospace">${m.name}</span>`:null;}).filter(Boolean).join('');
+  const wann=t.art==='datum'?new Date(t.datum+'T12:00:00').toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'}):`KW ${t.kw}/${t.kwJahr}`;
+  return `<div class="list-item" id="et-row-${t.id}" style="align-items:flex-start;${t.erledigt?'opacity:.5':''}">
+    <div class="lli" style="flex:1">
+      <div class="avatar" style="background:#60a5fa22;color:#60a5fa">📌</div>
+      <div style="flex:1">
+        <div class="item-name">${t.name}</div>
+        <div class="item-sub">${wann}${st?' · '+st.name:''}${t.notiz?' · '+t.notiz:''}</div>
+        ${maChips?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${maChips}</div>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="markEinmaligErledigt(${t.id})" title="${t.erledigt?'Wiederherstellen':'Als erledigt markieren'}">${t.erledigt?'↩️':'✅'}</button>
+      <button class="btn btn-danger" onclick="deleteEinmalig(${t.id})">✕</button>
+    </div>
+  </div>`;
+}
+ 
 // NAV
 function nav(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -949,13 +1127,15 @@ function nav(name,el){
   el.classList.add('active');
   if(name==='standorte')updateDatalists();
   if(name==='backup')renderBackupStats();
+  if(name==='einmalig')renderEinmalig();
 }
-
+ 
 // INIT
 document.getElementById('plan-datum').value=today();
 document.getElementById('wa-datum').value=today();
 document.getElementById('imp-datum').value=today();
-renderMitarbeiter();renderStandorte();renderTermine();updateDatalists();updateTerminStandortSelect();renderPlan();
-</script>
+renderMitarbeiter();renderStandorte();renderTermine();renderEinmalig();updateDatalists();updateTerminStandortSelect();renderPlan();
+if(!S.einmalig)S.einmalig=[];
 </body>
 </html>
+ 
