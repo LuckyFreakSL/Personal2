@@ -274,8 +274,6 @@ option.gesperrt{color:#5a6272!important;}
     <div class="card">
       <div class="card-title"><span class="dot"></span>Nachricht generieren</div>
       <div class="form-group"><label>Datum</label><input type="date" id="wa-datum"></div>
-      <div class="form-group"><label>Einleitung</label><input id="wa-intro" value="Guten Morgen Team! 👋"></div>
-      <div class="form-group"><label>Abschluss</label><input id="wa-outro" value="Guten Start und bleibt sicher! 💪"></div>
       <button class="btn btn-primary" style="width:100%" onclick="generateWA()">📋 Nachricht generieren</button>
       <div id="wa-konflikte" style="margin-top:14px"></div>
     </div>
@@ -838,7 +836,6 @@ function confirmImport(detectedDate,result,newMA,newST){
 function generateWA(){
   const ds=document.getElementById('wa-datum').value;if(!ds)return;
   initPlanDate(ds);const plan=S.plan[ds];
-  const intro=document.getElementById('wa-intro').value,outro=document.getElementById('wa-outro').value;
   let text='';if(intro)text+=intro+'\n\n';
   const dateObj=new Date(ds+'T12:00:00');
   text+=`${dateObj.toLocaleDateString('de-DE',{weekday:'long'})}\n${dateObj.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'})}\n\n`;
